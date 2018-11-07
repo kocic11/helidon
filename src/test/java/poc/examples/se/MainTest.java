@@ -38,7 +38,7 @@ public class MainTest {
     @BeforeAll
     public static void startTheServer() throws Exception {
         webServer = Main.startServer();
-        while (! webServer.isRunning()) {
+        while (!webServer.isRunning()) {
             Thread.sleep(1 * 1000);
         }
     }
@@ -46,38 +46,43 @@ public class MainTest {
     @AfterAll
     public static void stopServer() throws Exception {
         if (webServer != null) {
-            webServer.shutdown()
-                     .toCompletableFuture()
-                     .get(10, TimeUnit.SECONDS);
+            webServer.shutdown().toCompletableFuture().get(10, TimeUnit.SECONDS);
         }
     }
 
     @Test
-    public void testHelloWorld() throws Exception {
+    public void testDefault() throws Exception {
         HttpURLConnection conn;
 
-        conn = getURLConnection("GET","/greet");
+        conn = getURLConnection("GET", "/");
         Assertions.assertEquals(200, conn.getResponseCode(), "HTTP response1");
         JsonReader jsonReader = Json.createReader(conn.getInputStream());
         JsonObject jsonObject = jsonReader.readObject();
-        Assertions.assertEquals("Hello World!", jsonObject.getString("message"),
-                "default message");
+        Assertions.assertEquals("Hello World!", jsonObject.getString("message"), "default message");
+    }
+
+    @Test
+    public void testHelloJoe() throws Exception {
+        HttpURLConnection conn;
 
         conn = getURLConnection("GET", "/greet/Joe");
         Assertions.assertEquals(200, conn.getResponseCode(), "HTTP response2");
-        jsonReader = Json.createReader(conn.getInputStream());
-        jsonObject = jsonReader.readObject();
-        Assertions.assertEquals("Hello Joe!", jsonObject.getString("message"),
-                "hello Joe message");
+        JsonReader jsonReader = Json.createReader(conn.getInputStream());
+        JsonObject jsonObject = jsonReader.readObject();
+        Assertions.assertEquals("Hello Joe!", jsonObject.getString("message"), "hello Joe message");
+    }
+
+    @Test
+    public void testGreeting() throws Exception {
+        HttpURLConnection conn;
 
         conn = getURLConnection("PUT", "/greet/greeting/Hola");
         Assertions.assertEquals(200, conn.getResponseCode(), "HTTP response3");
         conn = getURLConnection("GET", "/greet/Jose");
         Assertions.assertEquals(200, conn.getResponseCode(), "HTTP response4");
-        jsonReader = Json.createReader(conn.getInputStream());
-        jsonObject = jsonReader.readObject();
-        Assertions.assertEquals("Hola Jose!", jsonObject.getString("message"),
-                "hola Jose message");
+        JsonReader jsonReader = Json.createReader(conn.getInputStream());
+        JsonObject jsonObject = jsonReader.readObject();
+        Assertions.assertEquals("Hola Jose!", jsonObject.getString("message"), "hola Jose message");
     }
 
     private HttpURLConnection getURLConnection(String method, String path) throws Exception {
